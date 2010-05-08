@@ -3,8 +3,8 @@ module Exceptron
     config.exceptron = true
 
     initializer "exceptron.swap_middlewares" do |app|
-      app.middlewares.insert_before "ActionDispatch::ShowExceptions", "Exceptron::Middleware"
-      app.middlewares.delete "ActionDispatch::ShowExceptions"
+      app.middleware.insert_before "ActionDispatch::ShowExceptions", "Exceptron::Middleware"
+      app.middleware.delete "ActionDispatch::ShowExceptions"
     end
   end
 end
