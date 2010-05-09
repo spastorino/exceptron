@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.version = Exceptron::VERSION.dup
 
   s.authors = ["José Valim"]
-  s.description = "Exceptron cames from the future to make your exceptions rock!"
+  s.description = "Exceptron comes from the future to make your exceptions rock!"
 
-  s.files = Dir["lib/**/*.rb"] + %w(README.rdoc MIT-LICENSE)
+  s.files = Dir["lib/**/*.{rb,erb}"] + %w(README.rdoc MIT-LICENSE)
   s.test_files = Dir["test/**/*"]
   s.extra_rdoc_files = ["README.rdoc"]
 
@@ -17,5 +17,5 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--main", "README.rdoc"]
   s.require_paths = ["lib"]
   s.rubygems_version = "1.3.6"
-  s.summary = "Exceptron cames from the future to make your exceptions rock!"
+  s.summary = "Exceptron comes from the future to make your exceptions rock!"
 end
