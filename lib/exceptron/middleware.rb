@@ -2,16 +2,16 @@ module Exceptron
   class Middleware
     LOCALHOST = ['127.0.0.1', '::1'].freeze
 
-    DEFAULT_ACTION = "internal_server_error"
-
     FAILSAFE_RESPONSE = [500, {'Content-Type' => 'text/html'},
-      ["<html><body><h1>500 Internal Server Error</h1>" <<
-       "If you are the administrator of this website, then please read this web " <<
-       "application's log file and/or the web server's log file to find out what " <<
-       "went wrong.</body></html>"]]
+      ["<html><head><title>500 Internal Server Error</title></head>" <<
+       "<body><h1>500 Internal Server Error</h1>If you are the administrator of " <<
+       "this website, then please read this web application's log file and/or the " <<
+       "web server's log file to find out what went wrong.</body></html>"]]
 
     def initialize(app, consider_all_requests_local)
-      @app, @consider_all_requests_local = app, consider_all_requests_local
+      @app = app
+      @consider_all_requests_local = consider_all_requests_local
+      @exception_actions = {}
     end
 
     def call(env)
@@ -23,6 +23,7 @@ module Exceptron
 
       [status, headers, body]
     rescue Exception => exception
+      raise e unless Exceptron.enabled?
       env["exceptron.exception"] = exception
       render_exception(env, exception)
     end
@@ -30,38 +31,45 @@ module Exceptron
   protected
 
     def render_exception(env, exception)
-      # log_error(exception)
+      log_error(exception)
 
-      # TODO Freeze sessions and cookies
+      # Freeze session and cookies since any change is not going to be serialized back.
+      request = ActionDispatch::Request.new(env)
+      request.cookies.freeze
+      request.session.freeze
 
-      controller = exceptions_controller(env)
-      action = exception_action(exception)
+      controller = exception_controller(request)
+      action = exception_action(controller, exception.class)
 
-
-      if controller.action_methods.include?(action)
+      if action
         controller.action(action).call(env)
-      elsif controller.action_methods.include?(DEFAULT_ACTION)
-        controller.action(DEFAULT_ACTION).call(env)
       else
         FAILSAFE_RESPONSE
       end
     rescue Exception => failsafe_error
       $stderr.puts "Error during failsafe response: #{failsafe_error}"
+      $stderr.puts failsafe_error.backtrace.join("\n")
       FAILSAFE_RESPONSE
     end
 
-    def exceptions_controller(env)
-      request = ActionDispatch::Request.new(env)
-
-      if @consider_all_requests_local || local_request?(request)
-        Exceptron::LocalExceptionsController
-      else
-        @_exceptions_controller ||= Exceptron.controller.constantize
-      end
+    def exception_controller(request)
+      @consider_all_requests_local || local_request?(request) ?
+        Exceptron::LocalExceptionsController : Exceptron.controller
     end
 
-    def exception_action(exception)
-      Rack::Utils::HTTP_STATUS_CODES[exception.status_code].to_s
+    def exception_action(controller, exception)
+      @exception_actions[exception.name] ||= begin
+        action_methods = controller.action_methods
+        action = nil
+
+        while exception && exception != Object
+          action = exception.status_message.downcase.gsub(/\s|-/, '_')
+          break if action_methods.include?(action)
+          exception, action = exception.superclass, nil
+        end
+
+        action
+      end
     end
 
     def local_request?(request)
@@ -74,14 +82,10 @@ module Exceptron
       return unless logger
 
       ActiveSupport::Deprecation.silence do
-        if ActionView::Template::Error === exception
-          logger.fatal(exception.to_s)
-        else
-          logger.fatal(
-            "\n#{exception.class} (#{exception.message}):\n  " +
-            clean_backtrace(exception).join("\n  ") + "\n\n"
-          )
-        end
+        message = "\n#{exception.class} (#{exception.message}):\n"
+        message << exception.annoted_source_code if exception.respond_to?(:annoted_source_code)
+        message << exception.backtrace.join("\n  ")
+        logger.fatal("#{message}\n\n")
       end
     end
 
