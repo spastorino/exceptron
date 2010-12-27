@@ -12,7 +12,7 @@ module Exceptron
 
   protected
 
-    def _prefixex
+    def _prefixes
       %w(rescues)
     end
   end
