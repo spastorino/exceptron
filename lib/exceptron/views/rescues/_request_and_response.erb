@@ -24,4 +24,4 @@
 
 
 <h2 style="margin-top: 30px">Response</h2>
-<p><b>Headers</b>: <pre><%=h response ? response.headers.inspect.gsub(',', ",\n") : 'None' %></pre></p>
+<p><b>Headers</b>: <pre><%=h defined?(response) ? response.headers.inspect.gsub(',', ",\n") : 'None' %></pre></p>

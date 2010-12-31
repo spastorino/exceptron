@@ -1,7 +1,5 @@
 module Exceptron
   class Middleware
-    LOCALHOST = ['127.0.0.1', '::1'].freeze
-
     FAILSAFE_RESPONSE = [500, {'Content-Type' => 'text/html'},
       ["<html><head><title>500 Internal Server Error</title></head>" <<
        "<body><h1>500 Internal Server Error</h1>If you are the administrator of " <<
@@ -32,6 +30,7 @@ module Exceptron
 
     def render_exception(env, exception)
       log_error(exception)
+      exception = original_exception(exception)
 
       # Freeze session and cookies since any change is not going to be serialized back.
       request = ActionDispatch::Request.new(env)
@@ -53,7 +52,7 @@ module Exceptron
     end
 
     def exception_controller(request)
-      @consider_all_requests_local || local_request?(request) ?
+      @consider_all_requests_local || request.local? ?
         Exceptron::LocalExceptionsController : Exceptron.controller
     end
 
@@ -72,18 +71,13 @@ module Exceptron
       end
     end
 
-    def local_request?(request)
-      LOCALHOST.any? do |local_ip|
-        request.remote_addr == local_ip && request.remote_ip == local_ip
-      end
-    end
-
     def log_error(exception)
       return unless logger
 
       ActiveSupport::Deprecation.silence do
         message = "\n#{exception.class} (#{exception.message}):\n"
-        message << exception.annoted_source_code if exception.respond_to?(:annoted_source_code)
+        message << exception.annoted_source_code.to_s if exception.respond_to?(:annoted_source_code)
+        # message << "  " << application_trace.join("\n  ")
         message << exception.backtrace.join("\n  ")
         logger.fatal("#{message}\n\n")
       end
@@ -91,6 +85,18 @@ module Exceptron
 
     def logger
       defined?(Rails.logger) ? Rails.logger : Logger.new($stderr)
+    end
+
+    def original_exception(exception)
+      if registered_original_exception?(exception)
+        exception.original_exception
+      else
+        exception
+      end
+    end
+
+    def registered_original_exception?(exception)
+      exception.respond_to?(:original_exception) && Exceptron.rescue_templates[exception.original_exception.class.name]
     end
   end
 end
