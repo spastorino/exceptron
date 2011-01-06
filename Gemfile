@@ -1,6 +1,8 @@
 source "http://gemcutter.org"
 
-gem "rails", "3.0.0.beta3"
+gem 'rails', :git => 'git://github.com/rails/rails.git'
+gem 'arel',  :git => 'git://github.com/rails/arel.git'
+gem 'rack',  :git => 'git://github.com/rack/rack.git'
 gem "capybara", "0.3.7"
 gem "sqlite3-ruby", :require => "sqlite3"
 
