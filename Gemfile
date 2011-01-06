@@ -1,12 +1,16 @@
-source "http://gemcutter.org"
+source 'http://rubygems.org'
 
 gem 'rails', :git => 'git://github.com/rails/rails.git'
 gem 'arel',  :git => 'git://github.com/rails/arel.git'
 gem 'rack',  :git => 'git://github.com/rack/rack.git'
-gem "capybara", "0.3.7"
-gem "sqlite3-ruby", :require => "sqlite3"
 
-if RUBY_VERSION < '1.9'
-  gem "ruby-debug", ">= 0.10.3"
+gem 'sqlite3-ruby', :require => 'sqlite3'
+gem 'capybara'
+
+platform :mri_18 do
+  gem "ruby-debug"
 end
 
+platform :mri_19 do
+  gem "ruby-debug19"
+end

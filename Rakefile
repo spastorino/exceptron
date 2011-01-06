@@ -1,9 +1,9 @@
-# encoding: UTF-8
-require 'rake'
-require 'rake/rdoctask'
-require 'rake/gempackagetask'
+#!/usr/bin/env rake
 
+require 'rake/gempackagetask'
 require 'rake/testtask'
+require 'rake/rdoctask'
+
 
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
