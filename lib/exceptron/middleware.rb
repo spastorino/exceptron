@@ -13,17 +13,21 @@ module Exceptron
     end
 
     def call(env)
-      status, headers, body = @app.call(env)
+      begin
+        status, headers, body = @app.call(env)
+        exception = nil
 
-      if headers['X-Cascade'] == 'pass'
-        raise ActionController::RoutingError, "No route matches #{env['PATH_INFO'].inspect}"
+        # Only this middleware cares about RoutingError. So, let's just raise
+        # it here.
+        if headers['X-Cascade'] == 'pass'
+          raise ActionController::RoutingError, "No route matches #{env['PATH_INFO'].inspect}"
+        end
+      rescue Exception => exception
+        raise exception unless Exceptron.enabled?
+        env["exceptron.exception"] = exception
       end
 
-      [status, headers, body]
-    rescue Exception => exception
-      raise e unless Exceptron.enabled?
-      env["exceptron.exception"] = exception
-      render_exception(env, exception)
+      exception ? render_exception(env, exception) : [status, headers, body]
     end
 
   protected
