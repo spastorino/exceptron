@@ -9,7 +9,8 @@ module Exceptron
     def initialize(app, consider_all_requests_local)
       @app = app
       @consider_all_requests_local = consider_all_requests_local
-      @exception_actions = {}
+      @exception_actions_cache = {}
+      @exception_actions_cache_local = {}
     end
 
     def call(env)
@@ -34,15 +35,16 @@ module Exceptron
 
     def render_exception(env, exception)
       log_error(exception)
-      exception = original_exception(exception)
+      exception = exception.registered_exception
 
       # Freeze session and cookies since any change is not going to be serialized back.
       request = ActionDispatch::Request.new(env)
       request.cookies.freeze
       request.session.freeze
 
-      controller = exception_controller(request)
-      action = exception_action(controller, exception.class)
+      local = @consider_all_requests_local || request.local?
+      controller = exception_controller(local)
+      action = exception_action(local, controller, exception.class)
 
       if action
         controller.action(action).call(env)
@@ -55,13 +57,13 @@ module Exceptron
       FAILSAFE_RESPONSE
     end
 
-    def exception_controller(request)
-      @consider_all_requests_local || request.local? ?
-        Exceptron::LocalExceptionsController : Exceptron.controller
+    def exception_controller(local)
+      local ? Exceptron::LocalExceptionsController : Exceptron.controller
     end
 
-    def exception_action(controller, exception)
-      @exception_actions[exception.name] ||= begin
+    def exception_action(local, controller, exception)
+      cache = local ? @exception_actions_cache_local : @exception_actions_cache
+      cache[exception.name] ||= begin
         action_methods = controller.action_methods
         action = nil
 
@@ -89,18 +91,6 @@ module Exceptron
 
     def logger
       defined?(Rails.logger) ? Rails.logger : Logger.new($stderr)
-    end
-
-    def original_exception(exception)
-      if registered_original_exception?(exception)
-        exception.original_exception
-      else
-        exception
-      end
-    end
-
-    def registered_original_exception?(exception)
-      exception.respond_to?(:original_exception) && Exceptron.rescue_templates[exception.original_exception.class.name]
     end
   end
 end

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>We're sorry, but something went wrong (<%= exception.status_message %>)</title>
+  <%= stylesheet_link_tag "exceptions" %>
+</head>
+<body>
+  <div class="dialog">
+	<%= yield %>
+  </div>
+</body>
+</html>

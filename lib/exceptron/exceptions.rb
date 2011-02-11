@@ -18,6 +18,18 @@ class Exception
     _serialize(:json, options)
   end
 
+  def registered_exception
+    if registered_original_exception?
+      original_exception
+    else
+      self
+    end
+  end
+
+  def registered_original_exception?
+    respond_to?(:original_exception) && Exceptron.rescue_templates[original_exception.class.name]
+  end
+
   protected
 
   def _serialize(serializer, options) #:nodoc:
