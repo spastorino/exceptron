@@ -17,4 +17,8 @@ class ExceptionsController < ActionController::Base
   def internal_server_error
     respond_with exception
   end
+
+  def _prefixes
+    %(app_exceptions)
+  end
 end

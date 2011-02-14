@@ -37,7 +37,7 @@ module Exceptron
     end
 
     def exception_controller(local)
-      local ? Exceptron::LocalExceptionsController : Exceptron.controller
+      local ? Exceptron.local_controller : Exceptron.controller
     end
 
     def exception_action(local, controller, exception)

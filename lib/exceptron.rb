@@ -2,11 +2,12 @@ require 'exceptron/engine'
 require 'exceptron/exceptions'
 
 module Exceptron
+  autoload :Dispatcher,                'exceptron/dispatcher'
+  autoload :ExceptionsController,      'exceptron/exceptions_controller'
   autoload :Helpers,                   'exceptron/helpers'
   autoload :LocalExceptionsController, 'exceptron/local_exceptions_controller'
   autoload :LocalHelpers,              'exceptron/local_helpers'
   autoload :Middleware,                'exceptron/middleware'
-  autoload :Dispatcher,                'exceptron/dispatcher'
   autoload :VERSION,                   'exceptron/version'
 
 
@@ -35,6 +36,11 @@ module Exceptron
     class_eval "def self.controller; #{string}; end", __FILE__, __LINE__
   end
 
+  def self.local_controller=(string)
+    class_eval "def self.local_controller; #{string}; end", __FILE__, __LINE__
+  end
+
   self.enable!
-  self.controller = "ExceptionsController"
+  self.controller = "Exceptron::ExceptionsController"
+  self.local_controller = "Exceptron::LocalExceptionsController"
 end

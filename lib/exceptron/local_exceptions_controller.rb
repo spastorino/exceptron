@@ -4,16 +4,14 @@ module Exceptron
     include Exceptron::Helpers
 
     helper Exceptron::LocalHelpers
-    layout "rescues"
 
     def internal_server_error
       render :action => Exceptron.rescue_templates[exception.class.name]
     end
 
-  protected
-
-    def _prefixes
-      %w(rescues)
+    def self.inherited(subclass)
+      super
+      Exceptron.local_controller = subclass.to_s
     end
   end
 end
