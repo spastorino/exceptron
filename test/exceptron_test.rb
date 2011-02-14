@@ -2,7 +2,7 @@ require 'test_helper'
 
 # Move to abstract_unit.rb
 module Exceptron
-  class Middleware
+  class Dispatcher
     protected
     undef :logger
     # Silence logger

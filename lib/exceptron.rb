@@ -6,6 +6,7 @@ module Exceptron
   autoload :LocalExceptionsController, 'exceptron/local_exceptions_controller'
   autoload :LocalHelpers,              'exceptron/local_helpers'
   autoload :Middleware,                'exceptron/middleware'
+  autoload :Dispatcher,                'exceptron/dispatcher'
   autoload :VERSION,                   'exceptron/version'
 
 
