@@ -8,7 +8,7 @@ end
 
 class ExceptronPublicCustomTest < ActionDispatch::IntegrationTest
   def setup
-    Exceptron.controller = "ExceptionsCustomController"
+    Exceptron.controller = ExceptionsCustomController
   end
 
   test "rescue in public from a remote ip" do

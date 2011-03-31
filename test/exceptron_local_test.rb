@@ -2,7 +2,7 @@ require 'test_helper'
 
 class ExceptronLocalTest < ActionDispatch::IntegrationTest
   def setup
-    Exceptron.local_controller = "Exceptron::LocalExceptionsController"
+    Exceptron.local_controller = Exceptron::LocalExceptionsController
   end
 
   test "rescue locally from a local request" do

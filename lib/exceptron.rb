@@ -32,15 +32,15 @@ module Exceptron
     @@enabled
   end
 
-  def self.controller=(string)
-    class_eval "def self.controller; #{string}; end", __FILE__, __LINE__
+  def self.controller=(klass)
+    class_eval "def self.controller; #{klass.name}; end", __FILE__, __LINE__
   end
 
-  def self.local_controller=(string)
-    class_eval "def self.local_controller; #{string}; end", __FILE__, __LINE__
+  def self.local_controller=(klass)
+    class_eval "def self.local_controller; #{klass.name}; end", __FILE__, __LINE__
   end
 
   self.enable!
-  self.controller = "Exceptron::ExceptionsController"
-  self.local_controller = "Exceptron::LocalExceptionsController"
+  self.controller = Exceptron::ExceptionsController
+  self.local_controller = Exceptron::LocalExceptionsController
 end

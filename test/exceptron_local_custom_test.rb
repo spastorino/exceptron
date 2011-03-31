@@ -8,7 +8,7 @@ end
 
 class ExceptronLocalCustomTest < ActionDispatch::IntegrationTest
   def setup
-    Exceptron.local_controller = "LocalExceptionsCustomController"
+    Exceptron.local_controller = LocalExceptionsCustomController
   end
 
   test "rescue locally from a local request" do

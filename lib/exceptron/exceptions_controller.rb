@@ -9,7 +9,7 @@ module Exceptron
 
     def self.inherited(subclass)
       super
-      Exceptron.controller = subclass.to_s
+      Exceptron.controller = subclass
     end
   end
 end

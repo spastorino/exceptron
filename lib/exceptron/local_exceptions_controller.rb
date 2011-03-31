@@ -11,7 +11,7 @@ module Exceptron
 
     def self.inherited(subclass)
       super
-      Exceptron.local_controller = subclass.to_s
+      Exceptron.local_controller = subclass
     end
   end
 end
