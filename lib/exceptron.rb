@@ -32,12 +32,8 @@ module Exceptron
     @@enabled
   end
 
-  def self.controller=(klass)
-    class_eval "def self.controller; #{klass.name}; end", __FILE__, __LINE__
-  end
-
-  def self.local_controller=(klass)
-    class_eval "def self.local_controller; #{klass.name}; end", __FILE__, __LINE__
+  class << self
+    attr_accessor :controller, :local_controller
   end
 
   self.enable!
