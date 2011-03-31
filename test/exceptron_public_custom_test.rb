@@ -1,14 +1,21 @@
 require 'test_helper'
 
-class ExceptionsCustomController < Exceptron::ExceptionsController
-  prepend_view_path File.expand_path('../views', __FILE__)
-
-  def not_implemented; end
-end
-
 class ExceptronPublicCustomTest < ActionDispatch::IntegrationTest
   def setup
-    Exceptron.controller = ExceptionsCustomController
+    # Hack to test inherited hook
+    unless defined?(ExceptionsCustomController)
+      klass = Class.new(Exceptron::ExceptionsController) do
+        def self.name
+          'ExceptionsCustomController'
+        end
+
+        prepend_view_path File.expand_path('../views', __FILE__)
+
+        def not_implemented; end
+      end
+
+      Object.const_set klass.name, klass
+    end
   end
 
   test "rescue in public from a remote ip" do
