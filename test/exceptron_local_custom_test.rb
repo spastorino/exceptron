@@ -3,19 +3,22 @@ require 'test_helper'
 class ExceptronLocalCustomTest < ActionDispatch::IntegrationTest
   def setup
     # Hack to test inherited hook
-    unless defined?(LocalExceptionsCustomController)
-      klass = Class.new(Exceptron::LocalExceptionsController) do
-        def self.name
-          'LocalExceptionsCustomController'
-        end
-
-        prepend_view_path File.expand_path('../views', __FILE__)
-
-        def not_implemented; end
+    klass = Class.new(Exceptron::LocalExceptionsController) do
+      def self.name
+        'LocalExceptionsCustomController'
       end
 
-      Object.const_set klass.name, klass
+      prepend_view_path File.expand_path('../views', __FILE__)
+
+      def not_implemented; end
     end
+
+    Object.const_set klass.name, klass
+  end
+
+  def teardown
+    Object.send :remove_const, 'LocalExceptionsCustomController'
+    Exceptron.local_controller = Exceptron::LocalExceptionsController
   end
 
   test "rescue locally from a local request" do

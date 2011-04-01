@@ -1,10 +1,6 @@
 require 'test_helper'
 
 class ExceptronLocalTest < ActionDispatch::IntegrationTest
-  def setup
-    Exceptron.local_controller = Exceptron::LocalExceptionsController
-  end
-
   test "rescue locally from a local request" do
     @app = ProductionApp
     ['127.0.0.1', '127.0.0.127', '::1', '0:0:0:0:0:0:0:1', '0:0:0:0:0:0:0:1%0'].each do |ip_address|

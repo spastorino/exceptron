@@ -1,10 +1,6 @@
 require 'test_helper'
 
 class ExceptronPublicTest < ActionDispatch::IntegrationTest
-  def setup
-    Exceptron.controller = Exceptron::ExceptionsController
-  end
-
   test "rescue in public from a remote ip" do
     @app = ProductionApp
     self.remote_addr = '208.77.188.166'
