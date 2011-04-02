@@ -43,12 +43,12 @@ module Exceptron
     def exception_action(local, controller, exception)
       cache = local ? @exception_actions_cache_local : @exception_actions_cache
       cache[exception.name] ||= begin
-        action_methods = controller.action_methods
         action = nil
+        controller = controller.new
 
         while exception && exception != Object
           action = exception.status_message.downcase.gsub(/\s|-/, '_')
-          break if action_methods.include?(action)
+          break if controller.action_method?(action)
           exception, action = exception.superclass, nil
         end
 

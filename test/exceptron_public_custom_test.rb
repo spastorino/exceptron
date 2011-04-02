@@ -9,8 +9,6 @@ class ExceptronPublicCustomTest < ActionDispatch::IntegrationTest
       end
 
       prepend_view_path File.expand_path('../views', __FILE__)
-
-      def not_implemented; end
     end
 
     Object.const_set klass.name, klass
