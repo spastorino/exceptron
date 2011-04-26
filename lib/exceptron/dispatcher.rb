@@ -16,12 +16,7 @@ module Exceptron
       log_error(exception)
       exception = exception.registered_exception
 
-      # Freeze session and cookies since any change is not going to be serialized back.
-      request = ActionDispatch::Request.new(env)
-      request.cookies.freeze
-      request.session.freeze
-
-      local = @consider_all_requests_local || request.local?
+      local = @consider_all_requests_local || ActionDispatch::Request.new(env).local?
       controller = exception_controller(local)
       action = exception_action(local, controller, exception.class)
 
