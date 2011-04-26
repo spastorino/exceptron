@@ -9,6 +9,20 @@ class ExceptronLocalCustomTest < ActionDispatch::IntegrationTest
       end
 
       prepend_view_path File.expand_path('../views', __FILE__)
+
+      def internal_server_error
+        respond_to do |format|
+          format.html { super }
+          format.json { render :json => exception.to_json }
+        end
+      end
+
+      def not_found
+        respond_to do |format|
+          format.html { render :action => Exceptron.rescue_templates[exception.class.name] }
+          format.xml { render :xml => exception.to_xml }
+        end
+      end
     end
 
     Object.const_set klass.name, klass
@@ -135,6 +149,25 @@ class ExceptronLocalCustomTest < ActionDispatch::IntegrationTest
     assert_select 'body' do
       assert_select 'h1', "[CUSTOM] Unknown action"
       assert_select 'p', "[CUSTOM] AbstractController::ActionNotFound"
+    end
+  end
+
+  test "rescue other formats in public from a remote ip" do
+    @app = ProductionApp
+    ['127.0.0.1', '127.0.0.127', '::1', '0:0:0:0:0:0:0:1', '0:0:0:0:0:0:0:1%0'].each do |ip_address|
+      self.remote_addr = ip_address
+
+      get "/", {}, 'HTTP_ACCEPT' => 'application/json'
+      assert_response 500
+      assert_equal 'application/json', response.content_type.to_s
+      assert_match %r{"message":"Internal Server Error"}, response.body
+      assert_match %r{"status":500}, response.body
+
+      get "/not_found", {}, 'HTTP_ACCEPT' => 'application/xml'
+      assert_response 404
+      assert_equal 'application/xml', response.content_type.to_s
+      assert_match %r{<message>Not Found</message>}, response.body
+      assert_match %r{<status type="integer">404</status>}, response.body
     end
   end
 end

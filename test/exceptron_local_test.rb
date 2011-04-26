@@ -86,4 +86,37 @@ class ExceptronLocalTest < ActionDispatch::IntegrationTest
       assert_select 'p', "AbstractController::ActionNotFound"
     end
   end
+
+  test "rescue locally other formats as html from a local request" do
+    @app = ProductionApp
+    ['127.0.0.1', '127.0.0.127', '::1', '0:0:0:0:0:0:0:1', '0:0:0:0:0:0:0:1%0'].each do |ip_address|
+      self.remote_addr = ip_address
+
+      get "/", {}, 'HTTP_ACCEPT' => 'application/json'
+      assert_response 500
+      assert_equal 'text/html', response.content_type.to_s
+      assert_select 'title', "Exceptron: Exception caught"
+      assert_select 'body' do
+        assert_select 'h1', "RuntimeError"
+      end
+      assert_match(/puke/, body)
+
+      get "/not_found", {}, 'HTTP_ACCEPT' => 'application/xml'
+      assert_response 404
+      assert_equal 'text/html', response.content_type.to_s
+      assert_select 'title', "Exceptron: Exception caught"
+      assert_select 'body' do
+        assert_select 'h1', "Unknown action"
+        assert_select 'p', "AbstractController::ActionNotFound"
+      end
+
+      get "/method_not_allowed", {}, 'HTTP_ACCEPT' => 'application/json'
+      assert_response 405
+      assert_equal 'text/html', response.content_type.to_s
+      assert_select 'title', "Exceptron: Exception caught"
+      assert_select 'body' do
+        assert_select 'h1', "ActionController::MethodNotAllowed"
+      end
+    end
+  end
 end

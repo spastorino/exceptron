@@ -108,4 +108,21 @@ class ExceptronPublicCustomTest < ActionDispatch::IntegrationTest
       assert_select 'p', "[CUSTOM] You may have mistyped the address or the page may have moved."
     end
   end
+
+  test "rescue other formats in public from a remote ip" do
+    @app = ProductionApp
+    self.remote_addr = '208.77.188.166'
+
+    get "/", {}, 'HTTP_ACCEPT' => 'application/json'
+    assert_response 500
+    assert_equal 'application/json', response.content_type.to_s
+    assert_match %r{"message":"CUSTOM Internal Server Error"}, response.body
+    assert_match %r{"status":500}, response.body
+
+    get "/not_found", {}, 'HTTP_ACCEPT' => 'application/xml'
+    assert_response 404
+    assert_equal 'application/xml', response.content_type.to_s
+    assert_match %r{<message>CUSTOM Not Found</message>}, response.body
+    assert_match %r{<status type="integer">404</status>}, response.body
+  end
 end

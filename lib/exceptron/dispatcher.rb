@@ -42,7 +42,8 @@ module Exceptron
 
     def exception_action(local, controller, exception)
       cache = local ? @exception_actions_cache_local : @exception_actions_cache
-      cache[exception.name] ||= begin
+      cache[controller] ||= {}
+      cache[controller][exception.name] ||= begin
         action = nil
         controller = controller.new
 
