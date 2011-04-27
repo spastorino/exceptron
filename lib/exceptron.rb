@@ -1,8 +1,8 @@
 require 'exceptron/engine'
-require 'exceptron/exceptions'
 
 module Exceptron
   autoload :Dispatcher,                'exceptron/dispatcher'
+  autoload :Exception,                 'exceptron/exception'
   autoload :ExceptionsController,      'exceptron/exceptions_controller'
   autoload :Helpers,                   'exceptron/helpers'
   autoload :LocalExceptionsController, 'exceptron/local_exceptions_controller'

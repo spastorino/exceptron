@@ -1,5 +1,5 @@
 <h1>
-  <%=h exception.class.to_s %>
+  <%=h exception.wrapped_exception.class.name %>
   <% if request.parameters['controller'] %>
     in <%=h request.parameters['controller'].humanize %>Controller<% if request.parameters['action'] %>#<%=h request.parameters['action'] %><% end %>
   <% end %>

@@ -1,9 +1,9 @@
 module Exceptron
   class Dispatcher
     FAILSAFE_RESPONSE = [500, {'Content-Type' => 'text/html'},
-      ["<html><head><title>500 Internal Server Error</title></head>" <<
-       "<body><h1>500 Internal Server Error</h1>If you are the administrator of " <<
-       "this website, then please read this web application's log file and/or the " <<
+      ["<html><head><title>500 Internal Server Error</title></head>" +
+       "<body><h1>500 Internal Server Error</h1>If you are the administrator of " +
+       "this website, then please read this web application's log file and/or the " +
        "web server's log file to find out what went wrong.</body></html>"]]
 
     def initialize(consider_all_requests_local)
@@ -12,8 +12,8 @@ module Exceptron
     end
 
     def dispatch(env, exception)
-      log_error(exception)
-      exception = exception.registered_exception
+      log_error(exception.wrapped_exception)
+      exception = exception.original_exception
 
       local = @consider_all_requests_local || ActionDispatch::Request.new(env).local?
       controller = exception_controller(local)
@@ -34,16 +34,16 @@ module Exceptron
       local ? Exceptron.local_controller : Exceptron.controller
     end
 
-    def exception_action(local, controller, exception)
+    def exception_action(local, controller, exception_class)
       @exception_actions_cache[controller] ||= {}
-      @exception_actions_cache[controller][exception.name] ||= begin
+      @exception_actions_cache[controller][exception_class.name] ||= begin
         action = nil
         controller = controller.new
 
-        while exception && exception != Object
-          action = exception.status_message.downcase.gsub(/\s|-/, '_')
+        while exception_class && exception_class != Object
+          action = exception_class.status_message.downcase.gsub(/\s|-/, '_')
           break if controller.action_method?(action)
-          exception, action = exception.superclass, nil
+          exception_class, action = exception_class.superclass, nil
         end
 
         action

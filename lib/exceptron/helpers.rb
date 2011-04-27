@@ -15,7 +15,6 @@ module Exceptron
 
     def exception
       @exception ||= env["exceptron.exception"]
-      @exception.registered_exception
     end
   end
 end

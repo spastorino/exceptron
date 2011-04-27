@@ -15,8 +15,9 @@ module Exceptron
         if headers['X-Cascade'] == 'pass'
           raise ActionController::RoutingError, "No route matches [#{env['REQUEST_METHOD']}] #{env['PATH_INFO'].inspect}"
         end
-      rescue Exception => exception
+      rescue ::Exception => exception
         raise exception unless Exceptron.enabled?
+        exception = Exception.new(exception)
         env["exceptron.exception"] = exception
       end
 

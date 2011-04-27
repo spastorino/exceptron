@@ -1,13 +1,15 @@
-class Exception
-  delegate :status_code, :status_message, :to => :"self.class"
+class Exceptron::Exception
+  def initialize(exception)
+    @wrapped_exception = exception
+  end
+  attr_reader :wrapped_exception
 
-  def self.status_code
-    500
+  def method_missing(method, *args, &block)
+    original_exception.send(method, *args, &block)
   end
 
-  def self.status_message
-    status = Rack::Utils::HTTP_STATUS_CODES[status_code]
-    status.to_s if status
+  def respond_to?(method)
+    super || original_exception.respond_to?(method)
   end
 
   def to_xml(options={})
@@ -18,16 +20,12 @@ class Exception
     _serialize(:json, options)
   end
 
-  def registered_exception
-    if registered_original_exception?
-      original_exception
+  def original_exception
+    if wrapped_exception.respond_to?(:original_exception)
+      wrapped_exception.original_exception
     else
-      self
+      wrapped_exception
     end
-  end
-
-  def registered_original_exception?
-    respond_to?(:original_exception) && Exceptron.rescue_templates[original_exception.class.name]
   end
 
   protected
@@ -36,6 +34,25 @@ class Exception
     hash    = { :status => status_code, :message => status_message }
     options = { :root => "error" }.merge!(options)
     hash.send(:"to_#{serializer}", options)
+  end
+end
+
+class Exception
+  def self.status_code
+    500
+  end
+
+  def status_code
+    self.class.status_code
+  end
+
+  def self.status_message
+    status = Rack::Utils::HTTP_STATUS_CODES[status_code]
+    status.to_s if status
+  end
+
+  def status_message
+    self.class.status_message
   end
 end
 

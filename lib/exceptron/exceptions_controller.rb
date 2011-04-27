@@ -1,8 +1,9 @@
 module Exceptron
   class ExceptionsController < ActionController::Base
     append_view_path File.expand_path("../views", __FILE__)
-    include Exceptron::Helpers
     respond_to :html, :xml, :json
+
+    include Exceptron::Helpers
 
     def internal_server_error
       respond_with exception

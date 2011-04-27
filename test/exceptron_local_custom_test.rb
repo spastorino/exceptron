@@ -19,7 +19,7 @@ class ExceptronLocalCustomTest < ActionDispatch::IntegrationTest
 
       def not_found
         respond_to do |format|
-          format.html { render :action => Exceptron.rescue_templates[exception.class.name] }
+          format.html { render :action => Exceptron.rescue_templates[exception.original_exception.class.name] }
           format.xml { render :xml => exception.to_xml }
         end
       end
