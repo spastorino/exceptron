@@ -9,7 +9,6 @@ module Exceptron
     def initialize(consider_all_requests_local)
       @consider_all_requests_local = consider_all_requests_local
       @exception_actions_cache = {}
-      @exception_actions_cache_local = {}
     end
 
     def dispatch(env, exception)
@@ -36,9 +35,8 @@ module Exceptron
     end
 
     def exception_action(local, controller, exception)
-      cache = local ? @exception_actions_cache_local : @exception_actions_cache
-      cache[controller] ||= {}
-      cache[controller][exception.name] ||= begin
+      @exception_actions_cache[controller] ||= {}
+      @exception_actions_cache[controller][exception.name] ||= begin
         action = nil
         controller = controller.new
 
