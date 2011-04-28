@@ -1,4 +1,4 @@
-require 'exceptron/engine'
+require 'exceptron/railtie'
 
 module Exceptron
   autoload :Dispatcher,                'exceptron/dispatcher'

@@ -1,5 +1,5 @@
 module Exceptron
-  class Engine < Rails::Engine
+  class Railtie < Rails::Railtie
     config.exceptron = Exceptron
 
     initializer "exceptron.swap_middlewares" do |app|
