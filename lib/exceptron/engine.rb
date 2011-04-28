@@ -6,5 +6,11 @@ module Exceptron
       app.middleware.swap "ActionDispatch::ShowExceptions",
         "Exceptron::Middleware", app.config.consider_all_requests_local
     end
+
+    config.after_initialize do
+      config.exceptron.enable!
+      config.exceptron.controller ||= Exceptron::ExceptionsController
+      config.exceptron.local_controller ||= Exceptron::LocalExceptionsController
+    end
   end
 end

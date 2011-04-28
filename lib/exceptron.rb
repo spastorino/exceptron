@@ -35,8 +35,4 @@ module Exceptron
   class << self
     attr_accessor :controller, :local_controller
   end
-
-  self.enable!
-  self.controller = Exceptron::ExceptionsController
-  self.local_controller = Exceptron::LocalExceptionsController
 end
