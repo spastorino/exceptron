@@ -4,6 +4,11 @@ class Exceptron::Exception
   end
   attr_reader :wrapped_exception
 
+  class << self
+    attr_accessor :statuses
+  end
+  self.statuses = {}
+
   def method_missing(method, *args, &block)
     original_exception.send(method, *args, &block)
   end
@@ -18,6 +23,25 @@ class Exceptron::Exception
 
   def to_json(options={})
     _serialize(:json, options)
+  end
+
+  def status_code
+    statuses = self.class.statuses
+    registered_exception = original_exception.class.ancestors.find { |klass| statuses.key? klass }
+    statuses[registered_exception]
+  end
+
+  def status_message
+    status = Rack::Utils::HTTP_STATUS_CODES[status_code]
+    status.to_s if status
+  end
+
+  def actions
+    original_exception.class.ancestors.map do |klass|
+      status_code = self.class.statuses[klass]
+      status = Rack::Utils::HTTP_STATUS_CODES[status_code]
+      status.to_s.downcase.gsub(/\s|-/, '_') if status
+    end.compact
   end
 
   def original_exception
@@ -38,56 +62,44 @@ class Exceptron::Exception
 end
 
 class Exception
-  def self.status_code
-    500
+  def self.respond_with(status)
+    Exceptron::Exception.statuses[self] = status
   end
-
-  def status_code
-    self.class.status_code
-  end
-
-  def self.status_message
-    status = Rack::Utils::HTTP_STATUS_CODES[status_code]
-    status.to_s if status
-  end
-
-  def status_message
-    self.class.status_message
-  end
+  respond_with 500
 end
 
 ActiveSupport.on_load(:action_controller) do
   class ActionController::RoutingError
-    def self.status_code; 404; end
+    respond_with 404
   end
 
   class AbstractController::ActionNotFound
-    def self.status_code; 404; end
+    respond_with 404
   end
 
   class ActionController::MethodNotAllowed
-    def self.status_code; 405; end
+    respond_with 405
   end
 
   class ActionController::NotImplemented
-    def self.status_code; 501; end
+    respond_with 501
   end
 end
 
 ActiveSupport.on_load(:active_record) do
   class ActiveRecord::RecordNotFound
-    def self.status_code; 404; end
+    respond_with 404
   end
 
   class ActiveRecord::StaleObjectError
-    def self.status_code; 409; end
+    respond_with 409
   end
 
   class ActiveRecord::RecordInvalid
-    def self.status_code; 422; end
+    respond_with 422
   end
 
   class ActiveRecord::RecordNotSaved
-    def self.status_code; 422; end
+    respond_with 422
   end
 end

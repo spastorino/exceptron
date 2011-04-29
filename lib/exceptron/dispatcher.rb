@@ -13,11 +13,10 @@ module Exceptron
 
     def dispatch(env, exception)
       log_error(exception.wrapped_exception)
-      exception = exception.original_exception
 
       local = @consider_all_requests_local || ActionDispatch::Request.new(env).local?
       controller = exception_controller(local)
-      action = exception_action(local, controller, exception.class)
+      action = exception_action(local, controller, exception)
 
       if action
         controller.action(action).call(env)
@@ -34,20 +33,11 @@ module Exceptron
       local ? Exceptron.local_controller : Exceptron.controller
     end
 
-    def exception_action(local, controller, exception_class)
-      @exception_actions_cache[controller] ||= {}
-      @exception_actions_cache[controller][exception_class.name] ||= begin
-        action = nil
-        controller = controller.new
-
-        while exception_class && exception_class != Object
-          action = exception_class.status_message.downcase.gsub(/\s|-/, '_')
-          break if controller.action_method?(action)
-          exception_class, action = exception_class.superclass, nil
-        end
-
-        action
-      end
+    def exception_action(local, controller_klass, exception)
+      controller = controller_klass.new
+      @exception_actions_cache[controller_klass] ||= {}
+      @exception_actions_cache[controller_klass][exception.original_exception.class] ||=
+        exception.actions.find { |action| controller.action_method?(action) }
     end
 
     def log_error(exception)
