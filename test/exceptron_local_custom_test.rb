@@ -13,14 +13,14 @@ class ExceptronLocalCustomTest < ActionDispatch::IntegrationTest
       def internal_server_error
         respond_to do |format|
           format.html { super }
-          format.json { render :json => exception.to_json }
+          format.json { render :json => exception_presenter.to_json }
         end
       end
 
       def not_found
         respond_to do |format|
-          format.html { render :action => Exceptron.rescue_templates[exception.original_exception.class.name] }
-          format.xml { render :xml => exception.to_xml }
+          format.html { render :action => Exceptron.rescue_templates[exception_presenter.original_exception.class.name] }
+          format.xml { render :xml => exception_presenter.to_xml }
         end
       end
     end

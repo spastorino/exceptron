@@ -1,4 +1,4 @@
-class Exceptron::Exception
+class Exceptron::Presenter
   def initialize(exception)
     @wrapped_exception = exception
   end
@@ -8,14 +8,6 @@ class Exceptron::Exception
     attr_accessor :statuses
   end
   self.statuses = {}
-
-  def method_missing(method, *args, &block)
-    original_exception.send(method, *args, &block)
-  end
-
-  def respond_to?(method)
-    super || original_exception.respond_to?(method)
-  end
 
   def to_xml(options={})
     _serialize(:xml, options)
@@ -63,7 +55,7 @@ end
 
 class Exception
   def self.respond_with(status)
-    Exceptron::Exception.statuses[self] = status
+    Exceptron::Presenter.statuses[self] = status
   end
   respond_with 500
 end

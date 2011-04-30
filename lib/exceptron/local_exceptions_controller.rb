@@ -6,7 +6,7 @@ module Exceptron
     helper Exceptron::LocalHelpers
 
     def internal_server_error
-      render :action => Exceptron.rescue_templates[exception.original_exception.class.name]
+      render :action => Exceptron.rescue_templates[exception_presenter.original_exception.class.name]
     end
 
     def self.inherited(subclass)

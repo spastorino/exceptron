@@ -6,7 +6,7 @@ module Exceptron
     include Exceptron::Helpers
 
     def internal_server_error
-      respond_with exception
+      respond_with exception_presenter
     end
     alias not_found internal_server_error
     alias unprocessable_entity internal_server_error
