@@ -37,7 +37,7 @@ module Exceptron
       controller = controller_klass.new
       @exception_actions_cache[controller_klass] ||= {}
       @exception_actions_cache[controller_klass][exception.original_exception.class] ||=
-        exception.actions.find { |action| controller.action_method?(action) }
+        exception.actions.find { |action| controller.available_action?(action) }
     end
 
     def log_error(exception)
