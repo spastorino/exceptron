@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "exceptron"
   s.version = Exceptron::VERSION.dup
 
-  s.authors = ["José Valim"]
+  s.authors = ["Santiago Pastorino", "José Valim"]
   s.description = "Exceptron comes from the future to make your exceptions rock!"
 
   s.files = Dir["lib/**/*.{rb,erb}"] + %w(README.rdoc MIT-LICENSE)
