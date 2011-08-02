@@ -13,6 +13,10 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
   s.extra_rdoc_files = ["README.rdoc"]
 
+  s.add_runtime_dependency 'rails',      '~> 3.1.0.rc1'
+
+  s.add_development_dependency 'sqlite3'
+
   s.homepage = "http://github.com/jorlhuda/exceptron"
   s.rdoc_options = ["--main", "README.rdoc"]
   s.require_paths = ["lib"]
