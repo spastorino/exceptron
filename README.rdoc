@@ -1,3 +1,47 @@
 = Exceptron
 
 This project rocks and uses MIT-LICENSE.
+
+==Install
+
+Simply install it as any other gem:
+
+  gem install exceptron
+
+When using bundler, add it to your Gemfile:
+
+  gem exceptron
+
+==Quick Start
+
+We assume you are using rails 3.x.
+
+Create an initializer in config/initializers/exceptron.rb like this:
+
+  Exceptron.controller = ExceptionsController
+
+Create a new controller in app/controllers/exceptions_controller.rb like this:
+
+  class ExceptionsController < ApplicationController
+    include Exceptron::Helpers
+
+    def not_found
+      render :text => "not_found"
+    end
+  
+    def unprocessable_entity
+      render :text => "unprocessable_entity"
+    end
+  
+    def internal_server_error
+      puts exception.inspect
+      render :text => "internal_server_error"
+    end
+  end
+
+Adjust the controller to your needs. That's it! :)
+
+== Known issues
+
+1. Auto reloading does not work for the ExceptionsController. In case of any changes you have to restart the webserver.
+2. You cannot alter the flash or session because it's already closed/ saved.
